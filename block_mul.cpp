@@ -378,6 +378,17 @@ void basic_status_pack(BamCompleteBlock *completeBlock, BamStatus *status) {
 
 int main(int argc, char *argv[]) {
 
+#if 0
+    volatile int aa = 0;
+    fprintf(stderr, "aa %d\n", aa);
+    while(aa == 0) {
+        
+    }
+    fprintf(stderr, "aa %d\n", aa);
+#endif
+
+
+
     CLI::App app("RabbitBAM");
 
     string inputfile;
@@ -414,10 +425,12 @@ int main(int argc, char *argv[]) {
     }
     if (strcmp(app.get_subcommands()[0]->get_name().c_str(), "benchmark_count") == 0) {
         if(n_thread > total_threads - 4) n_thread = max(1, total_threads - 4);
+
         TDEF(fq)
         TSTART(fq)
         printf("Starting Running Benchmark Count\n");
         printf("BGZF_MAX_BLOCK_COMPLETE_SIZE is %d\n", BGZF_MAX_BLOCK_COMPLETE_SIZE);
+
         if (strcmp(outputfile.substr(outputfile.size() - 4).c_str(), "html") == 0) outputfile = ("./output.fastq");
         samFile *sin;
         sam_hdr_t *hdr;
@@ -430,23 +443,19 @@ int main(int argc, char *argv[]) {
         if ((hdr = sam_hdr_read(sin)) == NULL) {
             return 0;
         }
-
-        BamRead read(2000);
-        BamCompress compress(8000, n_thread);
-        BamCompleteBlock completeBlock(10);
-
         printf("Malloc Memory is Over\n");
+
+#define test_block_num 1024
+
+        BamCompleteBlock completeBlock(test_block_num);
+        BamCompress compress(test_block_num, n_thread);
+        BamRead read(test_block_num);
 
         thread *read_thread = new thread(&read_pack_main, sin->fp.bgzf, &read);
         thread **compress_thread = new thread *[n_thread];
 
         for (int i = 0; i < n_thread; i++) {
-            cpu_set_t cpuset;
-            CPU_ZERO(&cpuset);
-            CPU_SET(i, &cpuset);
             compress_thread[i] = new thread(&compress_pack_main, &read, &compress);
-            int rc = pthread_setaffinity_np(compress_thread[i]->native_handle(), sizeof(cpu_set_t), &cpuset);
-
         }
         thread *assign_thread = new thread(&benchmark_pack, &compress, &completeBlock);
         read_thread->join();

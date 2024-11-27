@@ -1,0 +1,1 @@
+bsub -q q_sw_expr -I -b -J test -N 1 -np 1 -cgsp 64 -share_size 12000 -cache_size 128 -o output.log -x LD_LIBRARY_PATH=./ext/htslib-1.20:./ext/libdeflate-1.20/build ./rabbitbam api_test -i ../../data/small.bam -o out.bam --nr 1 --nw 1

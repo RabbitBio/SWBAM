@@ -1,1 +1,1 @@
-CPPFLAGS="-I../libdeflate-1.20" LDFLAGS="-L../libdeflate-1.20/build" ./configure --with-libdeflate && make clean && make -j
+CC=swgcc CXX=swg++ ./configure --host=x86 --disable-bz2 --disable-lzma && make clean && make -j
