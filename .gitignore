@@ -1,0 +1,10 @@
+/others/
+/build*/
+/install/
+*.o
+*.a
+*.so*
+__pycache__/
+*.bam
+*.sam
+*.bai
